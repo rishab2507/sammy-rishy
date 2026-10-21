@@ -1,27 +1,6 @@
 const STORAGE_KEY = 'sammy-rishy-memory-list-v1';
 
-const defaultEntries = [
-  {
-    date: '2024-02-14',
-    title: 'Our first date',
-    details: 'The day everything felt warm, beautiful, and full of possibility.'
-  },
-  {
-    date: '2024-05-18',
-    title: 'Sunset walk',
-    details: 'A quiet walk, soft laughter, and the kind of moment we never wanted to end.'
-  },
-  {
-    date: '2024-10-04',
-    title: 'Movie night',
-    details: 'Snacks, cuddles, and a perfect evening wrapped in comfort and joy.'
-  },
-  {
-    date: '2025-01-12',
-    title: 'Weekend getaway',
-    details: 'A little trip full of memories, smiles, and beautiful time together.'
-  }
-];
+const defaultEntries = [];
 
 const memoryForm = document.getElementById('memoryForm');
 const memoryDate = document.getElementById('memoryDate');
@@ -42,7 +21,7 @@ function getEntries() {
 
   try {
     const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) && parsed.length ? parsed : [...defaultEntries];
+    return Array.isArray(parsed) ? parsed : [...defaultEntries];
   } catch (error) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultEntries));
     return [...defaultEntries];
@@ -124,7 +103,7 @@ memoryForm.addEventListener('submit', (event) => {
 });
 
 resetBtn.addEventListener('click', () => {
-  saveEntries(defaultEntries);
+  saveEntries([]);
   renderList();
 });
 
