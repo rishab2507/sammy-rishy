@@ -107,5 +107,6 @@ resetBtn.addEventListener('click', () => {
   renderList();
 });
 
+localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
 memoryDate.value = new Date().toISOString().split('T')[0];
 renderList();
