@@ -12,6 +12,8 @@ const totalCount = document.getElementById('totalCount');
 const latestDate = document.getElementById('latestDate');
 const resetBtn = document.getElementById('resetBtn');
 
+memoryDate.min = journeyStartDate;
+
 function getEntries() {
   const saved = localStorage.getItem(STORAGE_KEY);
 
@@ -110,6 +112,7 @@ memoryForm.addEventListener('submit', (event) => {
 
   memoryForm.reset();
   memoryDate.value = new Date().toISOString().split('T')[0];
+  memoryDate.min = journeyStartDate;
 });
 
 resetBtn.addEventListener('click', () => {
@@ -119,4 +122,5 @@ resetBtn.addEventListener('click', () => {
 
 localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
 memoryDate.value = new Date().toISOString().split('T')[0];
+memoryDate.min = journeyStartDate;
 renderList();
