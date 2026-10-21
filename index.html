@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sammy & Rishy</title>
+    <meta name="description" content="A shared memory list for Sammy and Rishy." />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Forever & Always</p>
+          <h1>Sammy & Rishy</h1>
+        </div>
+      </header>
+
+      <section class="summary-grid">
+        <div class="stat-card">
+          <span class="stat-label">Memories</span>
+          <strong id="totalCount">0</strong>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Latest memory</span>
+          <strong id="latestDate">—</strong>
+        </div>
+      </section>
+
+      <section class="panel form-panel">
+        <h2>Add a new memory</h2>
+        <form id="memoryForm">
+          <div class="field-row">
+            <label>
+              <span>Date</span>
+              <input id="memoryDate" type="date" required />
+            </label>
+            <label>
+              <span>Title</span>
+              <input id="memoryTitle" type="text" maxlength="80" placeholder="e.g. Beach day" required />
+            </label>
+          </div>
+          <label>
+            <span>Details</span>
+            <textarea id="memoryDetails" rows="3" maxlength="250" placeholder="What made this day special?"></textarea>
+          </label>
+          <div class="button-row">
+            <button type="submit" class="primary">Add memory</button>
+            <button type="button" id="resetBtn" class="secondary">Reset sample list</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel list-panel">
+        <div class="list-header">
+          <h2>Our shared memories</h2>
+        </div>
+        <ul id="memoryList" aria-live="polite"></ul>
+      </section>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
