@@ -14,6 +14,17 @@ const resetBtn = document.getElementById('resetBtn');
 
 memoryDate.min = journeyStartDate;
 
+function enforceMinDate() {
+  if (!memoryDate.value) {
+    memoryDate.value = journeyStartDate;
+    return;
+  }
+
+  if (new Date(memoryDate.value + 'T00:00:00') < new Date(journeyStartDate + 'T00:00:00')) {
+    memoryDate.value = journeyStartDate;
+  }
+}
+
 function getEntries() {
   const saved = localStorage.getItem(STORAGE_KEY);
 
@@ -92,8 +103,12 @@ function saveEntries(entries) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
+memoryDate.addEventListener('change', enforceMinDate);
+memoryDate.addEventListener('input', enforceMinDate);
+
 memoryForm.addEventListener('submit', (event) => {
   event.preventDefault();
+  enforceMinDate();
 
   const entry = {
     date: memoryDate.value,
@@ -113,6 +128,7 @@ memoryForm.addEventListener('submit', (event) => {
   memoryForm.reset();
   memoryDate.value = new Date().toISOString().split('T')[0];
   memoryDate.min = journeyStartDate;
+  enforceMinDate();
 });
 
 resetBtn.addEventListener('click', () => {
@@ -121,6 +137,6 @@ resetBtn.addEventListener('click', () => {
 });
 
 localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-memoryDate.value = new Date().toISOString().split('T')[0];
+memoryDate.value = journeyStartDate;
 memoryDate.min = journeyStartDate;
 renderList();
