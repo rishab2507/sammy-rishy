@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'sammy-rishy-memory-list-v1';
 
 const defaultEntries = [];
+const journeyStartDate = '2026-05-02';
 
 const memoryForm = document.getElementById('memoryForm');
 const memoryDate = document.getElementById('memoryDate');
@@ -41,6 +42,15 @@ function formatDate(dateString) {
   }).format(date);
 }
 
+function formatJourneyStart() {
+  const date = new Date(journeyStartDate + 'T00:00:00');
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(date);
+}
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
@@ -56,7 +66,7 @@ function renderList() {
   if (!entries.length) {
     memoryList.innerHTML = '<li class="empty-state">No memories yet. Start with your first one.</li>';
     totalCount.textContent = '0';
-    latestDate.textContent = '—';
+    latestDate.textContent = formatJourneyStart();
     return;
   }
 
@@ -73,7 +83,7 @@ function renderList() {
     .join('');
 
   totalCount.textContent = String(entries.length);
-  latestDate.textContent = formatDate(entries[0].date);
+  latestDate.textContent = formatJourneyStart();
 }
 
 function saveEntries(entries) {
