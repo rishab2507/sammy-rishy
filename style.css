@@ -1,64 +1,252 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sammy & Rishy</title>
-    <meta name="description" content="A shared memory list for Sammy and Rishy." />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="page-shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">Forever & Always</p>
-          <h1>Sammy & Rishy</h1>
-        </div>
-      </header>
+:root {
+  --bg-1: #1d1027;
+  --bg-2: #2c1a3d;
+  --panel: rgba(38, 26, 53, 0.78);
+  --panel-border: rgba(255,255,255,0.12);
+  --text: #fdf6ff;
+  --muted: #eadaf6;
+  --pink: #f9a8d4;
+  --rose: #f472b6;
+  --lavender: #c4b5fd;
+  --mint: #a7f3d0;
+  --shadow: rgba(18, 10, 25, 0.45);
+  --soft-glass: rgba(255, 255, 255, 0.06);
+}
 
-      <section class="summary-grid">
-        <div class="stat-card">
-          <span class="stat-label">Memories</span>
-          <strong id="totalCount">0</strong>
-        </div>
-        <div class="stat-card">
-          <span class="stat-label">Our journey started on</span>
-          <strong id="latestDate">2nd May 2026</strong>
-        </div>
-      </section>
+* { box-sizing: border-box; }
 
-      <section class="panel form-panel">
-        <h2>Add a new memory</h2>
-        <form id="memoryForm">
-          <div class="field-row">
-            <label class="date-label">
-              <span>Date</span>
-              <input class="modern-date" id="memoryDate" type="date" min="2026-05-02" required />
-            </label>
-            <label>
-              <span>Title</span>
-              <input id="memoryTitle" type="text" maxlength="80" placeholder="e.g. Beach day" required />
-            </label>
-          </div>
-          <label>
-            <span>Details</span>
-            <textarea id="memoryDetails" rows="3" maxlength="250" placeholder="What made this day special?"></textarea>
-          </label>
-          <div class="button-row">
-            <button type="submit" class="primary">Add memory</button>
-            <button type="button" id="resetBtn" class="secondary">Clear list</button>
-          </div>
-        </form>
-      </section>
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+  color: var(--text);
+}
 
-      <section class="panel list-panel">
-        <div class="list-header">
-          <h2>Our shared memories</h2>
-        </div>
-        <ul id="memoryList" aria-live="polite"></ul>
-      </section>
-    </div>
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 26px 18px 60px;
+}
 
-    <script src="script.js"></script>
-  </body>
-</html>
+.page-shell {
+  width: min(100%, 860px);
+}
+
+.topbar {
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  color: var(--mint);
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 3.3rem);
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.stat-card, .panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  box-shadow: 0 18px 40px var(--shadow);
+  backdrop-filter: blur(12px);
+}
+
+.stat-card {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.stat-card strong {
+  font-size: clamp(1.5rem, 4vw, 2.3rem);
+  color: var(--pink);
+}
+
+.panel {
+  padding: 22px 20px;
+}
+
+.form-panel { margin-bottom: 22px; }
+
+#memoryForm {
+  margin-top: 18px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 16px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.date-label {
+  min-width: 0;
+}
+
+input, textarea, button {
+  font: inherit;
+}
+
+input, textarea {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  background: rgba(12, 8, 18, 0.28);
+  color: var(--text);
+  padding: 12px 14px;
+}
+
+.modern-date {
+  appearance: none;
+  -webkit-appearance: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px;
+  color: var(--text);
+  padding: 14px 16px;
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 22px rgba(17, 10, 24, 0.18);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.modern-date:hover {
+  border-color: rgba(249, 168, 212, 0.6);
+}
+
+.modern-date:focus {
+  outline: none;
+  border-color: rgba(249, 168, 212, 0.9);
+  box-shadow: 0 0 0 4px rgba(249, 168, 212, 0.16), 0 10px 22px rgba(17, 10, 24, 0.24);
+}
+
+.modern-date::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(1) brightness(1.3);
+  opacity: 0.9;
+}
+
+.modern-date::-webkit-datetime-edit-text {
+  color: var(--text);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+button {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+button:hover { transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+
+button.primary {
+  background: linear-gradient(135deg, var(--pink), var(--lavender));
+  color: #1e102a;
+}
+
+button.secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.list-header {
+  margin-bottom: 18px;
+}
+
+#memoryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.memory-item {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+
+.memory-date {
+  color: var(--mint);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.memory-title {
+  margin: 10px 0 8px;
+  font-size: 1.2rem;
+}
+
+.memory-detail {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.empty-state {
+  border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 12px;
+  text-align: center;
+  color: var(--muted);
+  padding: 18px 10px;
+}
+
+@media (max-width: 640px) {
+  .field-row { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr; }
+}
