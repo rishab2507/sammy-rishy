@@ -10,7 +10,6 @@
   --lavender: #c4b5fd;
   --mint: #a7f3d0;
   --shadow: rgba(18, 10, 25, 0.45);
-  --soft-glass: rgba(255, 255, 255, 0.06);
 }
 
 * { box-sizing: border-box; }
@@ -220,11 +219,35 @@ button.secondary {
   padding: 16px 18px;
 }
 
+.memory-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
 .memory-date {
   color: var(--mint);
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.delete-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  border-color: rgba(249, 168, 212, 0.7);
+  background: rgba(249, 168, 212, 0.08);
 }
 
 .memory-title {
@@ -249,4 +272,9 @@ button.secondary {
 @media (max-width: 640px) {
   .field-row { grid-template-columns: 1fr; }
   .summary-grid { grid-template-columns: 1fr; }
+
+  .memory-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

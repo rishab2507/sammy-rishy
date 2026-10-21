@@ -1,252 +1,161 @@
-:root {
-  --bg-1: #1d1027;
-  --bg-2: #2c1a3d;
-  --panel: rgba(38, 26, 53, 0.78);
-  --panel-border: rgba(255,255,255,0.12);
-  --text: #fdf6ff;
-  --muted: #eadaf6;
-  --pink: #f9a8d4;
-  --rose: #f472b6;
-  --lavender: #c4b5fd;
-  --mint: #a7f3d0;
-  --shadow: rgba(18, 10, 25, 0.45);
-  --soft-glass: rgba(255, 255, 255, 0.06);
+const STORAGE_KEY = 'sammy-rishy-memory-list-v1';
+
+const defaultEntries = [];
+const journeyStartDate = '2026-05-02';
+
+const memoryForm = document.getElementById('memoryForm');
+const memoryDate = document.getElementById('memoryDate');
+const memoryTitle = document.getElementById('memoryTitle');
+const memoryDetails = document.getElementById('memoryDetails');
+const memoryList = document.getElementById('memoryList');
+const totalCount = document.getElementById('totalCount');
+const latestDate = document.getElementById('latestDate');
+const resetBtn = document.getElementById('resetBtn');
+
+memoryDate.min = journeyStartDate;
+
+function enforceMinDate() {
+  if (!memoryDate.value) {
+    memoryDate.value = journeyStartDate;
+    return;
+  }
+
+  if (new Date(memoryDate.value + 'T00:00:00') < new Date(journeyStartDate + 'T00:00:00')) {
+    memoryDate.value = journeyStartDate;
+  }
 }
 
-* { box-sizing: border-box; }
+function getEntries() {
+  const saved = localStorage.getItem(STORAGE_KEY);
 
-html, body {
-  margin: 0;
-  min-height: 100%;
-  font-family: Arial, Helvetica, sans-serif;
-  background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
-  color: var(--text);
+  if (!saved) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultEntries));
+    return [...defaultEntries];
+  }
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [...defaultEntries];
+  } catch (error) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultEntries));
+    return [...defaultEntries];
+  }
 }
 
-body {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 26px 18px 60px;
+function sortEntries(entries) {
+  return [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
-.page-shell {
-  width: min(100%, 860px);
+function formatDate(dateString) {
+  const date = new Date(dateString + 'T00:00:00');
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
 }
 
-.topbar {
-  margin-bottom: 22px;
+function formatJourneyStart() {
+  const date = new Date(journeyStartDate + 'T00:00:00');
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(date);
 }
 
-.eyebrow {
-  margin: 0 0 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  font-size: 0.7rem;
-  color: var(--mint);
-  font-weight: 700;
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
-h1 {
-  margin: 0;
-  font-size: clamp(2.2rem, 5vw, 3.3rem);
+function makeEntryKey(entry) {
+  return `${entry.date}::${entry.title}::${entry.details || ''}`;
 }
 
-h2 {
-  margin: 0;
-  font-size: 1.25rem;
+function renderList() {
+  const entries = sortEntries(getEntries());
+
+  if (!entries.length) {
+    memoryList.innerHTML = '<li class="empty-state">No memories yet. Start with your first one.</li>';
+    totalCount.textContent = '0';
+    latestDate.textContent = formatJourneyStart();
+    return;
+  }
+
+  memoryList.innerHTML = entries
+    .map(
+      (item) => `
+        <li class="memory-item">
+          <div class="memory-top">
+            <span class="memory-date">${formatDate(item.date)}</span>
+            <button type="button" class="delete-btn" data-key="${escapeHtml(makeEntryKey(item))}">Delete</button>
+          </div>
+          <h3 class="memory-title">${escapeHtml(item.title)}</h3>
+          ${item.details ? `<p class="memory-detail">${escapeHtml(item.details)}</p>` : ''}
+        </li>
+      `
+    )
+    .join('');
+
+  totalCount.textContent = String(entries.length);
+  latestDate.textContent = formatJourneyStart();
 }
 
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(140px, 1fr));
-  gap: 16px;
-  margin-bottom: 22px;
+function saveEntries(entries) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
-.stat-card, .panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 20px;
-  box-shadow: 0 18px 40px var(--shadow);
-  backdrop-filter: blur(12px);
-}
+memoryDate.addEventListener('change', enforceMinDate);
+memoryDate.addEventListener('input', enforceMinDate);
 
-.stat-card {
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+memoryList.addEventListener('click', (event) => {
+  const deleteButton = event.target.closest('.delete-btn');
+  if (!deleteButton) {
+    return;
+  }
 
-.stat-label {
-  color: var(--muted);
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+  const key = deleteButton.dataset.key;
+  const entries = getEntries().filter((entry) => makeEntryKey(entry) !== key);
+  saveEntries(entries);
+  renderList();
+});
 
-.stat-card strong {
-  font-size: clamp(1.5rem, 4vw, 2.3rem);
-  color: var(--pink);
-}
+memoryForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  enforceMinDate();
 
-.panel {
-  padding: 22px 20px;
-}
+  const entry = {
+    date: memoryDate.value,
+    title: memoryTitle.value.trim(),
+    details: memoryDetails.value.trim()
+  };
 
-.form-panel { margin-bottom: 22px; }
+  if (!entry.date || !entry.title) {
+    return;
+  }
 
-#memoryForm {
-  margin-top: 18px;
-}
+  const entries = sortEntries(getEntries());
+  entries.unshift(entry);
+  saveEntries(entries);
+  renderList();
 
-.field-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 16px;
-}
+  memoryForm.reset();
+  memoryDate.value = new Date().toISOString().split('T')[0];
+  memoryDate.min = journeyStartDate;
+  enforceMinDate();
+});
 
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 0.9rem;
-}
+resetBtn.addEventListener('click', () => {
+  saveEntries([]);
+  renderList();
+});
 
-.date-label {
-  min-width: 0;
-}
-
-input, textarea, button {
-  font: inherit;
-}
-
-input, textarea {
-  width: 100%;
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 12px;
-  background: rgba(12, 8, 18, 0.28);
-  color: var(--text);
-  padding: 12px 14px;
-}
-
-.modern-date {
-  appearance: none;
-  -webkit-appearance: none;
-  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 14px;
-  color: var(--text);
-  padding: 14px 16px;
-  font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 10px 22px rgba(17, 10, 24, 0.18);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-}
-
-.modern-date:hover {
-  border-color: rgba(249, 168, 212, 0.6);
-}
-
-.modern-date:focus {
-  outline: none;
-  border-color: rgba(249, 168, 212, 0.9);
-  box-shadow: 0 0 0 4px rgba(249, 168, 212, 0.16), 0 10px 22px rgba(17, 10, 24, 0.24);
-}
-
-.modern-date::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  filter: invert(1) brightness(1.3);
-  opacity: 0.9;
-}
-
-.modern-date::-webkit-datetime-edit-text {
-  color: var(--text);
-}
-
-textarea {
-  resize: vertical;
-  min-height: 90px;
-}
-
-.button-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-button {
-  border: none;
-  border-radius: 12px;
-  padding: 12px 18px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: transform 0.15s ease, opacity 0.2s ease;
-}
-
-button:hover { transform: translateY(-1px); }
-button:active { transform: translateY(0); }
-
-button.primary {
-  background: linear-gradient(135deg, var(--pink), var(--lavender));
-  color: #1e102a;
-}
-
-button.secondary {
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  border: 1px solid rgba(255,255,255,0.12);
-}
-
-.list-header {
-  margin-bottom: 18px;
-}
-
-#memoryList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.memory-item {
-  background: rgba(255,255,255,0.025);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 16px 18px;
-}
-
-.memory-date {
-  color: var(--mint);
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.memory-title {
-  margin: 10px 0 8px;
-  font-size: 1.2rem;
-}
-
-.memory-detail {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
-.empty-state {
-  border: 1px dashed rgba(255,255,255,0.2);
-  border-radius: 12px;
-  text-align: center;
-  color: var(--muted);
-  padding: 18px 10px;
-}
-
-@media (max-width: 640px) {
-  .field-row { grid-template-columns: 1fr; }
-  .summary-grid { grid-template-columns: 1fr; }
-}
+localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+memoryDate.value = journeyStartDate;
+memoryDate.min = journeyStartDate;
+renderList();
